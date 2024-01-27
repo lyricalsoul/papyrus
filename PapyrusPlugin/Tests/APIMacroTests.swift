@@ -130,11 +130,14 @@ final class APIMacroTests: XCTestCase {
                 @GET("some/path")
                 func myQuery(id userId: String?) async throws -> String
             }
+
             struct MyServiceAPI: MyService {
                 private let provider: PapyrusCore.Provider
+
                 init(provider: PapyrusCore.Provider) {
                     self.provider = provider
                 }
+
                 func myQuery(id userId: String? = nil) async throws -> String {
                     var req = builder(method: "GET", path: "some/path")
                     req.addQuery("userId", value: userId)
@@ -142,6 +145,7 @@ final class APIMacroTests: XCTestCase {
                     try res.validate()
                     return try res.decode(String.self, using: req.responseDecoder)
                 }
+
                 private func builder(method: String, path: String) -> RequestBuilder {
                     var req = provider.newBuilder(method: method, path: path)
                     req.requestEncoder = .json(JSONEncoder())
