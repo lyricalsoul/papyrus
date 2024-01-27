@@ -123,12 +123,14 @@ public struct RequestBuilder {
     // MARK: Building
 
     public mutating func addParameter<L: LosslessStringConvertible>(_ key: String, value: L) {
-        if value as? ExpressibleByNilLiteral == nil { return }
         parameters[key] = value.description
     }
 
     public mutating func addQuery<E: Encodable>(_ key: String, value: E, mapKey: Bool = true) {
-        if value as? ExpressibleByNilLiteral == nil { return }
+        if case Optional<Any>.none = value as Any {
+            return
+        }
+
         let key: ContentKey = mapKey ? .implicit(key) : .explicit(key)
         queries[key] = ContentValue(value)
     }
@@ -140,7 +142,6 @@ public struct RequestBuilder {
     }
 
     public mutating func addHeader<L: LosslessStringConvertible>(_ key: String, value: L, convertToHeaderCase: Bool = true) {
-        if value as? ExpressibleByNilLiteral == nil { return }
         let key = convertToHeaderCase ? key.httpHeaderCase() : key
         headers[key] = value.description
     }
@@ -173,6 +174,10 @@ public struct RequestBuilder {
     }
 
     public mutating func addField<E: Encodable>(_ key: String, value: E, mapKey: Bool = true) {
+        if case Optional<Any>.none = value as Any {
+            return
+        }
+
         var fields: [ContentKey: ContentValue] = [:]
         if let body = body {
             guard case .fields(let existingFields) = body else {
@@ -186,7 +191,32 @@ public struct RequestBuilder {
         fields[key] = ContentValue(value)
         body = .fields(fields)
     }
-    
+
+    public mutating func addField(_ key: String, value: Optional<Any>, mapKey: Bool = true) {
+        if case Optional<Any>.none = value as Any {
+            return
+        }
+
+        var fields: [ContentKey: ContentValue] = [:]
+        if let body = body {
+            guard case .fields(let existingFields) = body else {
+                preconditionFailure("Tried to add a Field, \(key): \(type(of: value)), to a request, but it already had Body or Multipart parameters, \(body). Body, Field, and Multipart are mutually exclusive.")
+            }
+            
+            fields = existingFields
+        }
+
+        let key: ContentKey = mapKey ? .implicit(key) : .explicit(key)
+        // try casting to Encodable
+        if let value = value as? Encodable {
+            fields[key] = ContentValue(value)
+        } else {
+            // if it's not encodable, just use the description
+            fields[key] = ContentValue(String(describing: value))
+        }
+        body = .fields(fields)
+    }
+
     // MARK: Creating Request Parts
 
     public func fullURL() throws -> URL {

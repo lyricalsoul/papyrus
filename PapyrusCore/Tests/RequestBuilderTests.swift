@@ -61,6 +61,7 @@ final class RequestBuilderTests: XCTestCase {
         req.requestEncoder = encoder
         req.addField("a", value: "one")
         req.addField("b", value: "two")
+        req.addField("c", value: nil)
         let (body, headers) = try req.bodyAndHeaders()
         guard let body else {
             XCTFail()
