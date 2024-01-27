@@ -123,10 +123,12 @@ public struct RequestBuilder {
     // MARK: Building
 
     public mutating func addParameter<L: LosslessStringConvertible>(_ key: String, value: L) {
+        if value as? ExpressibleByNilLiteral == nil { return }
         parameters[key] = value.description
     }
 
     public mutating func addQuery<E: Encodable>(_ key: String, value: E, mapKey: Bool = true) {
+        if value as? ExpressibleByNilLiteral == nil { return }
         let key: ContentKey = mapKey ? .implicit(key) : .explicit(key)
         queries[key] = ContentValue(value)
     }
@@ -138,6 +140,7 @@ public struct RequestBuilder {
     }
 
     public mutating func addHeader<L: LosslessStringConvertible>(_ key: String, value: L, convertToHeaderCase: Bool = true) {
+        if value as? ExpressibleByNilLiteral == nil { return }
         let key = convertToHeaderCase ? key.httpHeaderCase() : key
         headers[key] = value.description
     }
