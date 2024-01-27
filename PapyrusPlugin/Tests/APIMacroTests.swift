@@ -120,7 +120,7 @@ final class APIMacroTests: XCTestCase {
             @JSON(decoder: JSONDecoder())
             protocol MyService {
                 @GET("some/path")
-                func myQuery(id userId: String?) async throws -> String
+                func myQuery(id userId: String?, names: [String]?, moreNames: Array<String>?) async throws -> String
             }
             """
         } expansion: {
@@ -128,7 +128,7 @@ final class APIMacroTests: XCTestCase {
             @JSON(decoder: JSONDecoder())
             protocol MyService {
                 @GET("some/path")
-                func myQuery(id userId: String?) async throws -> String
+                func myQuery(id userId: String?, names: [String]?, moreNames: Array<String>?) async throws -> String
             }
 
             struct MyServiceAPI: MyService {
@@ -138,9 +138,11 @@ final class APIMacroTests: XCTestCase {
                     self.provider = provider
                 }
 
-                func myQuery(id userId: String? = nil) async throws -> String {
+                func myQuery(id userId: String? = nil, names: [String]? = nil, moreNames: Array<String>? = nil) async throws -> String {
                     var req = builder(method: "GET", path: "some/path")
                     req.addQuery("userId", value: userId)
+                    req.addQuery("names", value: names)
+                    req.addQuery("moreNames", value: moreNames)
                     let res = try await provider.request(req)
                     try res.validate()
                     return try res.decode(String.self, using: req.responseDecoder)

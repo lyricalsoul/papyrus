@@ -91,7 +91,7 @@ extension FunctionDeclSyntax {
 
         var newSignature = self.signature
         newSignature.parameterClause.parameters = FunctionParameterListSyntax(self.signature.parameterClause.parameters.map {
-            if $0.type.as(OptionalTypeSyntax.self)?.wrappedType.as(IdentifierTypeSyntax.self) != nil {
+            if $0.type.as(OptionalTypeSyntax.self) != nil {
                 var copy = $0
                 copy.defaultValue = InitializerClauseSyntax(equal: .equalToken(trailingTrivia: .space), value: NilLiteralExprSyntax())
                 return copy
