@@ -19,7 +19,7 @@ protocol Sample {
 
     @Multipart
     @POST("/todo/:id/attachment")
-    func upload(id: Int, part1: Part, part2: Part) async throws
+    func upload(id: Int, part1: Part, part2: Part?) async throws
 }
 
 public struct Todo: Codable {
